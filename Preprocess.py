@@ -20,11 +20,12 @@ def load_and_preprocess_CarSeats():
 
     return data
 
-def load_and_preprocess__ozone():
+def load_and_preprocess_ozone():
 
     # Charger la base de données depuis un fichier txt
     data = pd.read_csv("ozone_complet.txt", delimiter=';', quotechar='"')
     data = data.drop(columns=['maxO3v'])
+    data = data.dropna(subset=['maxO3'])
 
     return data
 
