@@ -1,8 +1,5 @@
 import pandas as pd
-
-
-
-# !!!!!!    Supprimer la premiere colonne vide -> "", au debut du fichier CSV    !!!!!!!    
+from sklearn.preprocessing import StandardScaler
 
 
 def load_and_preprocess_CarSeats():
@@ -22,11 +19,24 @@ def load_and_preprocess_CarSeats():
 
 def load_and_preprocess_ozone():
 
-    # Charger la base de données depuis un fichier txt
-    data = pd.read_csv("ozone_complet.txt", delimiter=';', quotechar='"')
-    data = data.drop(columns=['maxO3v'])
-    data = data.dropna(subset=['maxO3'])
+    # Load the database from a txt file
+    data = pd.read_csv('ozone_complet.txt', delimiter=';', quotechar=',')
 
-    return data
+    # Clean up the column names by removing the excess quotes
+    data.columns = data.columns.str.replace('"', '', regex=False) 
+    
+    # Drop dispensables items
+    data = data.drop(columns=['maxO3v']) #Drop the 'maxO3v' column 
+    data.dropna(inplace=True) #Drop the columns where there is/are NA value(s)
+
+    # Manual data normalisation
+    features = data.drop(columns=['maxO3']).copy() # Assume ‘maxO3’ is the target
+    normalized_features = (features - features.mean()) / features.std()
+
+    # Create a DataFrame with the normalized data
+    normalized_data = normalized_features.copy()
+    normalized_data['maxO3'] = data['maxO3'].values # Add the target column
+
+    return normalized_data
 
 

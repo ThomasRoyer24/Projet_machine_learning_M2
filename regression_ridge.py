@@ -1,62 +1,56 @@
 import pandas as pd
 import numpy as np
+from Preprocess import load_and_preprocess_ozone
 
 class RidgeRegression: 
     def __init__(self, penality): 
-        self.penality = penality # Regulation parameter 
+        self.penality = penality 
 
     def fit(self, X, y):
-        samples_nb = X.shape[0] # Number of samples
-        X_with_intercept = np.c_[np.ones((samples_nb, 1)), X] # Add a column for the intercept 
+        samples_nb = X.shape[0]
+        X_with_intercept = np.c_[np.ones((samples_nb, 1)), X]
 
-        # Creation of the identity matrix 
         identity_matrix = np.identity(X_with_intercept.shape[1]) 
-        identity_matrix[0, 0] = 0 # Non-application of interception penalty
+        identity_matrix[0, 0] = 0 # Do not regularise the intercept
 
-        # Define and solve the equations 
-        A = X_with_intercept.T.dot(X_with_intercept) + self.penality * identity_matrix  # A = X^TX + λI
-        B = X_with_intercept.T.dot(y)  # B = X^Ty
-        self.thetas = np.linalg.solve(A, B)  # Solve A * thetas = B
+        # Calculation of the matrices A and B for Ridge's solution
+        A = X_with_intercept.T.dot(X_with_intercept) + self.penality * identity_matrix
+        B = X_with_intercept.T.dot(y)
+        
+        # Display for debugging
+        print('A matrix:\n', A)
+        print('B vector:\n', B)
 
+        self.thetas = np.linalg.solve(A, B) # Solve for the parameters
         return self
 
     def predict(self, X): 
-        samples_nb = X.shape[0] # Number of samples
-        X_with_intercept = np.c_[np.ones((samples_nb, 1)), X]  # Add a column for the intercept 
-
-        # Prediction calculation 
-        predictions = X_with_intercept.dot(self.thetas) 
-
+        samples_nb = X.shape[0]
+        X_with_intercept = np.c_[np.ones((samples_nb, 1)), X]
+        predictions = X_with_intercept.dot(self.thetas) # Calculate predictions
         return predictions  
-    
 
-# Preprocess data and run Ridge Regression
-def runAndTestRidgeRegression(data):
+def runAndTestRidgeRegression():
+    ozone_data = load_and_preprocess_ozone()
 
-    #Preprocess the data 
-    n = 0.8*ozone_data.shape[0] # 80% of the total number of samples for training so 20% for test 
-
+    n = int(0.8 * ozone_data.shape[0])  
     train = ozone_data.iloc[:n]
-    test = ozone_data.iloc[n:] 
+    test = ozone_data.iloc[n:]
 
-    X_train = train.drop("maxO3").copy()
-    y_train = train["maxO3"]
-    X_test = test.drop("maxO3").copy()
-    y_test = test["maxO3"]
+    # Separation of characteristics and target
+    X_train = train.drop('maxO3', axis=1).copy()
+    y_train = train['maxO3']
+    X_test = test.drop('maxO3', axis=1).copy()
+    y_test = test['maxO3']
 
-    # Initialize and fit the model 
+    # Creation and fitting of the Ridge regression model
     model = RidgeRegression(penality=1.0)
     model.fit(X_train.values, y_train.values)
 
-    # Make predictions
+    # Predictions on test data
     predictions = model.predict(X_test.values)
-    print(predictions, y_test.values)  # Predictions and true values 
+    print('Predictions:', predictions)
+    print('True values:', y_test.values) 
 
-    # Test predictions 
-
-
-
-
-# Run and test the ridge regression
-ozone_data = pd.read_csv("ozone_complet.txt", delimiter=";") # Loading data 
-runAndTestRidgeRegression(ozone_data) 
+# Execute the function to test the model
+runAndTestRidgeRegression() 
