@@ -16,7 +16,7 @@ def load_and_preprocess_CarSeats():
     data = pd.read_csv('Carseats.csv') 
 
     # Conversion de la colonne ShelveLoc en variables numériques (dummy variables)
-    data = pd.get_dummies(data, columns=['ShelveLoc'])
+    data = pd.get_dummies(data, columns=['ShelveLoc'],dtype=int)
 
     # Transformer les colonnes en 0 et 1 (Yes -> 1, No -> 0)
     data['High'] = data['High'].map({'Yes': 1, 'No': 0})
