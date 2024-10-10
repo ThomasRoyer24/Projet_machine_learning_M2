@@ -17,6 +17,16 @@ def load_and_preprocess_CarSeats():
 
     return data
 
+def remove_outliers_iqr_all(data):
+    for column in data.select_dtypes(include=['float64', 'int64']).columns:
+        Q1 = data[column].quantile(0.25)
+        Q3 = data[column].quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+        data = data[(data[column] >= lower_bound) & (data[column] <= upper_bound)]
+    return data
+
 def load_and_preprocess_ozone():
 
     # Load the database from a txt file
@@ -28,6 +38,9 @@ def load_and_preprocess_ozone():
     # Drop dispensables items
     data = data.drop(columns=['maxO3v']) #Drop the 'maxO3v' column 
     data.dropna(inplace=True) #Drop the columns where there is/are NA value(s)
+
+    # Remove outliers
+    data = remove_outliers_iqr_all(data)
 
     # Manual data normalisation
     features = data.drop(columns=['maxO3']).copy() # Assume ‘maxO3’ is the target
