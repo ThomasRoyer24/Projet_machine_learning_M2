@@ -3,13 +3,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn import linear_model
 import time
-
 import sys
 
 if not sys.warnoptions:
     import warnings
     warnings.simplefilter("ignore")
-
 def compute_rmse(theta, X, y): # Calcul de la RMSE
     m = len(y)
     predictions = X @ theta
@@ -34,8 +32,6 @@ def linear_reg(n_iterations, X_normalized, y, learning_rate=0.1):
 
 def linear_reg_lasso(param, n_iterations, X_normalized, y,learning_rate=0.1):
     m, n = X_normalized.shape
-    print("m:", m)
-    print("n:", n)
     theta = np.zeros(n) # init des coefficients à 0
     rmse_history = []
 
@@ -108,15 +104,13 @@ y = y.to_numpy()
 
 n_iterations = 1000
 
-print("X_normalized contains NaN:", np.isnan(X).any())
+print("X_normalized contains NaN:", np.isnan(X).any()) # vérifier si X contient des NaN
 print("y contains NaN:", np.isnan(y).any())
 
 X_mean = X.mean(axis=0)
 X_std = X.std(axis=0)
 X_normalized = (X - X_mean) / X_std # normalisation
-
-print("X_normalized contains NaN:", np.isnan(X_normalized).any()) # vérifier si la normalisation a introduit des NaN
-print("y contains NaN:", np.isnan(y).any())
+X_normalized = np.c_[np.ones(X_normalized.shape[0]), X_normalized] # ajouter une colonne de 1 pour le biais
 
 
 def lasso_skit(X_normalized, y):
@@ -147,14 +141,14 @@ print("Time for scikit-learn:", end - start)
 
 # afficher rmse
 print2d(rmse_history_lasso, rmse_history_skit, "rmse_comparison.png")
+# print last rmse
+print("RMSE from scratch:", rmse_history_lasso[-1])
+print("RMSE scikit-learn:", rmse_history_skit[-1])
 # afficher predictions
 compare_predictions(X_normalized, y, theta_lasso, theta_skit, filename="comparison.png")
 
-
 ### Optimisation des paramètres
-
 from sklearn.model_selection import train_test_split
-
 def evaluate_model_scratch(X_train, y_train, X_val, y_val, alpha, learning_rate, n_iterations):
     theta, rmse_history = linear_reg_lasso(alpha, n_iterations, X_train, y_train, learning_rate)
     rmse_val = compute_rmse(theta, X_val, y_val)
