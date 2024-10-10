@@ -200,8 +200,8 @@ def grid_search(X, y):
     return best_params_scratch, best_params_sklearn
 
 
-a, b = grid_search(X_normalized, y)
-print("Best parameters for scratch model:", a)
-print("Best parameters for scikit-learn model:", b)
+#a, b = grid_search(X_normalized, y)
+#print("Best parameters for scratch model:", a)
+#print("Best parameters for scikit-learn model:", b)
 
 
