@@ -10,10 +10,10 @@ from sklearn.metrics import roc_curve, auc
 
 import time
 
-def load_and_preprocess_CarSeats():
+def prepro_CarSeats():
 
     # Charger la base de données depuis un fichier CSV
-    data = pd.read_csv('Carseats.csv') 
+    data = pd.read_csv('Data-20241001\Carseats.csv') 
 
     # Conversion de la colonne ShelveLoc en variables numériques (dummy variables)
     data = pd.get_dummies(data, columns=['ShelveLoc'],dtype=int)
@@ -26,20 +26,63 @@ def load_and_preprocess_CarSeats():
     data.drop(data.columns[data.columns.str.contains(
     'unnamed', case=False)], axis=1, inplace=True)
 
-    return data
-#prétraitement
-data=load_and_preprocess_CarSeats()
+    labels=data['High'].copy()
+    data=data.drop('High',axis=1)
+    data=data.to_numpy()
+    X_train,X_test,y_train,y_test=train_test_split(data,labels,test_size=20,random_state=123)
 
-labels=data['High'].copy()
-data=data.drop('High',axis=1)
-data=data.to_numpy()
-X_train,X_test,y_train,y_test=train_test_split(data,labels,test_size=20,random_state=123)
+    return X_train,X_test,y_train,y_test
 
+
+def prepro_Hitters():
+    data_train=pd.read_csv('Data-20241001\Hitters_train.csv')
+    data_test=pd.read_csv('Data-20241001\Hitters_test.csv')
+
+    data_train.dropna()
+    data_test.dropna()
+    
+    data_train['Division'] = data_train['Division'].map({'E': 1, 'W': 0})
+    data_train['League'] = data_train['League'].map({'A': 1, 'N': 0})
+    data_train['NewLeague'] = data_train['NewLeague'].map({'A': 1, 'N': 0})
+
+    data_test['Division'] = data_test['Division'].map({'E': 1, 'W': 0})
+    data_test['League'] = data_test['League'].map({'A': 1, 'N': 0})
+    data_test['NewLeague'] = data_test['NewLeague'].map({'A': 1, 'N': 0})
+   
+
+    data_train.drop(data_train.columns[data_train.columns.str.contains(
+    'unnamed', case=False)], axis=1, inplace=True)
+    data_test.drop(data_test.columns[data_test.columns.str.contains(
+    'unnamed', case=False)], axis=1, inplace=True)
+    
+    
+    data_train['Salary'] = data_train['Salary'].apply(lambda x: 1 if x > 425 else 0)
+    data_test['Salary'] = data_test['Salary'].apply(lambda x: 1 if x > 425 else 0)
+    
+    
+    dfx_train=data_train.drop(columns='Salary')
+    X_train=dfx_train.to_numpy()
+
+    dfx_test=data_test.drop(columns='Salary')
+    X_test=dfx_test.to_numpy()
+
+    dfy_train=data_train['Salary'].copy()
+    y_train=dfy_train.to_numpy()
+
+    dfy_test=data_test['Salary'].copy()
+    y_test=dfy_test.to_numpy()
+
+    return X_train,X_test,y_train,y_test
+
+
+X_train,X_test,y_train,y_test=prepro_Hitters()
+
+print(X_train)
 #Optimisation paramètres
 test_params = {
-    'lr': [0.0001, 0.001, 0.01],
-    'lambda_': [0.0001, 0.001, 0.01],
-    'n_iterations': [1000]
+    'lr': [0.0001,0.001,0.01],
+    'lambda_': [0.0001,0.001,0.01],
+    'n_iterations': [2000,10000]
 }
 best_accuracy = 0
 best_params = None
@@ -93,3 +136,6 @@ plt.title('Courbe ROC')
 plt.legend(loc='lower right')
 plt.grid()
 plt.show()
+
+
+#0.736, {'lr': 1e-05, 'lambda_': 0.0001, 'n_iterations': 40000}
