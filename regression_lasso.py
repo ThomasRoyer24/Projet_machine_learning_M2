@@ -4,6 +4,12 @@ import pandas as pd
 from sklearn import linear_model
 import time
 
+import sys
+
+if not sys.warnoptions:
+    import warnings
+    warnings.simplefilter("ignore")
+
 def compute_rmse(theta, X, y): # Calcul de la RMSE
     m = len(y)
     predictions = X @ theta
